@@ -45,5 +45,25 @@
         android:layout_above="@+id/generate_combo_button"
         android:layout_alignRight="@+id/current_combination_label"
         android:layout_alignEnd="@+id/current_combination_label"
-        android:contentDescription="@string/combination_lock" />
+        android:contentDescription="@string/combination_lock"
+        android:src="@drawable/outer_combo_lock"
+        android:scaleType="center" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/inner_combo_img"
+        android:src="@drawable/inner_combo_lock"
+        android:layout_above="@+id/generate_combo_button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="60dp" />
+
+    <SeekBar
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:layout_below="@+id/inner_combo_img"
+        android:layout_centerHorizontal="true"
+        android:max="360"
+        android:progress="9" />
 </RelativeLayout>
