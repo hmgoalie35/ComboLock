@@ -1,7 +1,7 @@
 package hpittin1ccunnin5msausne2.combolock;
 
 import android.content.Context;
-import android.content.Intent;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -15,12 +15,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 /**
- *
  * TODO
  * DONE combo generator should not have repeats.
  * DONE combos shouldn't start with 0
@@ -32,17 +30,16 @@ import java.util.Random;
  * implement reset
  * maybe time how long user spends at correct combo
  * readme - include no plagiarism statement
- *        - document how to use app
+ * - document how to use app
  * change combo color to green when user gets correct combo - separate textfields for each number
  * fix toast
  * unlock sounds?
  * unlock animation?
- *
  */
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
-    private TextView current_combination_label;
+    private TextView combo_1, combo_2, combo_3;
     private Button generate_combo_button;
     private ImageView inner_combo_img;
 
@@ -51,10 +48,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private final String log_tag = "development";
     private int[] current_combination;
-    private int correct_count  = 0;
-    private float timestamp  = 0;
-    private int deg_leeway   = 2;
+    private int correct_count = 0;
+    private float timestamp = 0;
+    private int deg_leeway = 2;
     private boolean not_done = true;
+    private ImageView arrow;
+    private int on_correct_combo = 0;
 
     //Each tick on the lock is separated by 9 degrees
     int deg_per_tick = 9;
@@ -69,10 +68,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         initSensors();
 
-        current_combination_label = (TextView) findViewById(R.id.current_combination_label);
+        combo_1 = (TextView) findViewById(R.id.combo_1);
+        combo_2 = (TextView) findViewById(R.id.combo_2);
+        combo_3 = (TextView) findViewById(R.id.combo_3);
+
         generate_combo_button = (Button) findViewById(R.id.generate_combo_button);
         generate_combo_button.setOnClickListener(new GenerateComboBtnListener());
         inner_combo_img = (ImageView) findViewById(R.id.inner_combo_img);
+
+        arrow = (ImageView) findViewById(R.id.arrow);
 
         //Correct image distortion
         inner_combo_img.setRotation(4);
@@ -97,8 +101,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void initSensors() {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
-
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
@@ -108,8 +110,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             gyroscope = gyroscopeSensors.get(0);
             mSensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
         } else {
-            Toast toast = Toast.makeText(getApplicationContext(), "Phone has no gyroscope", Toast.LENGTH_SHORT);
-            toast.show();
+            Toast.makeText(getApplicationContext(), "Phone has no gyroscope", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -135,7 +136,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int temp_combo_two;
         do {
             temp_combo_two = num_generator.nextInt(40);
-        } while (temp_combo_two == temp_combo_one || (temp_combo_two >= temp_combo_one - 5 && temp_combo_two <= temp_combo_one + 5 ));
+        }
+        while (temp_combo_two == temp_combo_one || (temp_combo_two >= temp_combo_one - 5 && temp_combo_two <= temp_combo_one + 5));
         current_combination[1] = temp_combo_two;
 
         //Combo numbers should not repeat
@@ -143,14 +145,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int temp_combo_three;
         do {
             temp_combo_three = num_generator.nextInt(40);
-        } while (temp_combo_three == temp_combo_one || temp_combo_three == temp_combo_two || (temp_combo_three >= temp_combo_two - 5 && temp_combo_three <= temp_combo_two + 5 ));
+        }
+        while (temp_combo_three == temp_combo_one || temp_combo_three == temp_combo_two || (temp_combo_three >= temp_combo_two - 5 && temp_combo_three <= temp_combo_two + 5));
         current_combination[2] = temp_combo_three;
 
-        //Converting to an array still contains [], so remove them with some substring magic.
-        String result = Arrays.toString(current_combination);
-        result = result.substring(1, result.length() - 1);
-        //Log.d(log_tag, "Combination is: " + result);
-        current_combination_label.setText(result);
+        combo_1.setText(Integer.toString(current_combination[0]));
+        combo_2.setText(Integer.toString(current_combination[1]));
+        combo_3.setText(Integer.toString(current_combination[2]));
     }
 
     @Override
@@ -166,8 +167,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 current_combo = 360 - (current_combination[correct_count] * deg_per_tick);
             }
 
-            int lower_limit   = current_combo - deg_leeway;
-            int upper_limit   = current_combo + deg_leeway;
+            int lower_limit = current_combo - deg_leeway;
+            int upper_limit = current_combo + deg_leeway;
 
             if (timestamp != 0) {
 
@@ -192,14 +193,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     inner_combo_img.setRotation(rotation_from_pivot);
 
                     if (rotation_from_pivot >= lower_limit && rotation_from_pivot <= upper_limit) {
-                        correct_count++;
-                        Log.d(log_tag, "Combo correct!");
+                        if (on_correct_combo >= 3) {
+                            on_correct_combo = 0;
+                            switch (correct_count) {
+                                case 0:
+                                    combo_1.setTextColor(Color.GREEN);
+                                    break;
+                                case 1:
+                                    combo_2.setTextColor(Color.GREEN);
+                                    break;
+                                case 2:
+                                    combo_3.setTextColor(Color.GREEN);
+                                    break;
+                            }
+                            correct_count++;
+                            Log.d(log_tag, "Combo correct!");
+                        } else {
+                            on_correct_combo++;
+                        }
                     }
 
                     //Combination is correct
                     if (correct_count >= 3) {
                         correct_count = 0;
+                        on_correct_combo = 0;
                         Log.d(log_tag, "Stop.");
+                        Toast.makeText(getApplicationContext(), "You have successfully unlocked the lock", Toast.LENGTH_LONG).show();
                         not_done = false;
                     }
 
@@ -229,6 +248,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         @Override
         public void onClick(View v) {
             generateRandomCombination();
+            combo_1.setTextColor(Color.BLACK);
+            combo_2.setTextColor(Color.BLACK);
+            combo_3.setTextColor(Color.BLACK);
+            correct_count = 0;
+            on_correct_combo = 0;
+            inner_combo_img.setRotation(4);
+            not_done = true;
         }
     }
 }

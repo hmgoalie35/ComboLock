@@ -3,4 +3,6 @@
     <string name="no_combination">No Combination</string>
     <string name="generate_new_combination">Generate New Combination</string>
     <string name="combination_lock">Combination Lock</string>
+    <string name="default_combo">0</string>
+    <string name="combo_lock_spinner_text">combolock_spinner</string>
 </resources>
