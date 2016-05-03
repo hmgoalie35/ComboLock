@@ -35,27 +35,37 @@
         android:textAlignment="center"
         android:textAllCaps="false"/>
 
-    <ImageView
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/main_combo_img"
-        android:layout_below="@+id/current_combination_label"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_above="@+id/generate_combo_button"
-        android:layout_alignRight="@+id/current_combination_label"
-        android:layout_alignEnd="@+id/current_combination_label"
-        android:contentDescription="@string/combination_lock"
-        android:src="@drawable/outer_combo_lock"
-        android:scaleType="center" />
+        android:layout_centerHorizontal="true">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/inner_combo_img"
-        android:src="@drawable/inner_combo_lock"
-        android:layout_above="@+id/generate_combo_button"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="60dp" />
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/main_combo_img"
+            android:contentDescription="@string/combination_lock"
+            android:src="@drawable/outer_combo_lock"
+            android:maxWidth="255dp"
+            android:minHeight="375dp"
+            android:maxHeight="375dp"
+            android:minWidth="255dp"
+            android:nestedScrollingEnabled="false"
+            android:layout_gravity="center_horizontal|bottom" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/inner_combo_img"
+            android:src="@drawable/inner_combo_lock"
+            android:maxHeight="200dp"
+            android:maxWidth="200dp"
+            android:minHeight="200dp"
+            android:minWidth="200dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="20dp" />
+
+    </FrameLayout>
 
 </RelativeLayout>
