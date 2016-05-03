@@ -26,6 +26,7 @@ import java.util.Random;
  * DONE combos shouldn't start with 0
  * DONE each combo number should be more than 5 degrees apart
  * DONE account for change in direction
+ * reduce number of times we have to do a full rotation
  * make filters better
  * discuss leeway
  * implement reset
