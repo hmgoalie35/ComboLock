@@ -1,6 +1,7 @@
 package hpittin1ccunnin5msausne2.combolock;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -18,22 +19,47 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+/**
+ *
+ * TODO
+ * DONE combo generator should not have repeats.
+ * DONE combos shouldn't start with 0
+ * DONE each combo number should be more than 5 degrees apart
+ * DONE account for change in direction
+ * make filters better
+ * discuss leeway
+ * implement reset
+ * maybe time how long user spends at correct combo
+ * readme - include no plagiarism statement
+ *        - document how to use app
+ * change combo color to green when user gets correct combo - separate textfields for each number
+ * fix toast
+ * unlock sounds?
+ * unlock animation?
+ *
+ */
+
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     private TextView current_combination_label;
-    private int[] current_combination;
-    private int correct_count = 0;
-    private boolean going_right = false;
-    private int actual_tick = 0;
     private Button generate_combo_button;
-    private final String log_tag = "development";
     private ImageView inner_combo_img;
 
     private SensorManager mSensorManager;
     private Sensor accelerometer, gyroscope;
 
-    private static final float NS2S = 1.0f / 1000000000.0f;
+    private final String log_tag = "development";
+    private int[] current_combination;
+    private int correct_count  = 0;
+    private float timestamp  = 0;
+    private int deg_leeway   = 2;
+    private boolean not_done = true;
 
-    private float timestamp = 0, gyroscope_data = 0;
+    //Each tick on the lock is separated by 9 degrees
+    int deg_per_tick = 9;
+
+    //Convert nanoseconds to seconds
+    private static final float NS2S = 1.0f / 1000000000.0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +72,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         generate_combo_button = (Button) findViewById(R.id.generate_combo_button);
         generate_combo_button.setOnClickListener(new GenerateComboBtnListener());
         inner_combo_img = (ImageView) findViewById(R.id.inner_combo_img);
+
+        //Correct image distortion
         inner_combo_img.setRotation(4);
+
         current_combination = new int[3];
 
         generateRandomCombination();
@@ -72,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
+        //This showed up on my phone but I have a gyroscope
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
             List<Sensor> gyroscopeSensors = mSensorManager.getSensorList(Sensor.TYPE_GYROSCOPE);
             gyroscope = gyroscopeSensors.get(0);
@@ -91,67 +121,96 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
      */
     private void generateRandomCombination() {
         Random num_generator = new Random();
-        for (int i = 0; i < 3; i++) {
-            current_combination[i] = num_generator.nextInt(40);
-        }
+
+        //First combo number should not be 0
+        int temp_combo_one;
+        do {
+            temp_combo_one = num_generator.nextInt(40);
+        } while (temp_combo_one == 0);
+        current_combination[0] = temp_combo_one;
+
+        //Combo numbers should not repeat
+        //Consecutive combo numbers should be separated by ~5 ticks in either direction
+        int temp_combo_two;
+        do {
+            temp_combo_two = num_generator.nextInt(40);
+        } while (temp_combo_two == temp_combo_one || (temp_combo_two >= temp_combo_one - 5 && temp_combo_two <= temp_combo_one + 5 ));
+        current_combination[1] = temp_combo_two;
+
+        //Combo numbers should not repeat
+        //Consecutive combo numbers should be separated by ~5 ticks in either direction
+        int temp_combo_three;
+        do {
+            temp_combo_three = num_generator.nextInt(40);
+        } while (temp_combo_three == temp_combo_one || temp_combo_three == temp_combo_two || (temp_combo_three >= temp_combo_two - 5 && temp_combo_three <= temp_combo_two + 5 ));
+        current_combination[2] = temp_combo_three;
+
         //Converting to an array still contains [], so remove them with some substring magic.
         String result = Arrays.toString(current_combination);
         result = result.substring(1, result.length() - 1);
-        Log.d(log_tag, "Combination is: " + result);
+        //Log.d(log_tag, "Combination is: " + result);
         current_combination_label.setText(result);
-    }
-
-    private void toggleBtnState(Button btn) {
-        btn.setEnabled(!btn.isEnabled());
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float x_axis_reading = event.values[0];
-        float radians;
-        if (timestamp != 0) {
-            final float dT = (event.timestamp - timestamp);
-            gyroscope_data = (x_axis_reading * dT) * NS2S;
-            radians = gyroscope_data;
-//            Log.d(log_tag, "Radians: " + Float.toString(radians));
-            if (radians < -.4) {
-                if (actual_tick == 39) {
-                    actual_tick = 0;
-                } else {
-                    actual_tick += 1;
-                }
-                going_right = true;
-                inner_combo_img.setRotation(inner_combo_img.getRotation() - 9);
-            } else if (radians > .4) {
-                if (actual_tick == 0) {
-                    actual_tick = 39;
-                } else {
-                    actual_tick -= 1;
-                }
-                going_right = false;
-                inner_combo_img.setRotation(inner_combo_img.getRotation() + 9);
-            } else if (radians < 1 && radians > -1 && Math.abs(radians) != 0.0) {
 
+        if (not_done) {
 
-                if (actual_tick == current_combination[correct_count]) {
-//                    Log.d(log_tag, "Correct value: " + Integer.toString(actual_tick));
-                    if (correct_count == 0 && going_right) {
-                        Log.d(log_tag, "Correct val 0");
-                        correct_count++;
-                    } else if (correct_count == 1 && !going_right) {
-                        Log.d(log_tag, "Correct val 1");
-                        correct_count++;
-                    } else if (correct_count == 2 && going_right) {
-                        correct_count++;
-                        Toast.makeText(getApplicationContext(), "Combo Lock successfully unlocked!", Toast.LENGTH_SHORT).show();
-                        correct_count = 0;
-                        toggleBtnState(generate_combo_button);
-                    }
-                }
-                Log.d(log_tag, "Current: " + Integer.toString(actual_tick));
+            float x_axis_reading = event.values[0];
+            int current_combo;
+            if (correct_count == 0 || correct_count == 2) {
+                current_combo = -(current_combination[correct_count] * deg_per_tick);
+            } else {
+                current_combo = 360 - (current_combination[correct_count] * deg_per_tick);
             }
+
+            int lower_limit   = current_combo - deg_leeway;
+            int upper_limit   = current_combo + deg_leeway;
+
+            if (timestamp != 0) {
+
+                final float time_interval = (event.timestamp - timestamp) * NS2S;
+                float radians = x_axis_reading * time_interval;
+
+                //Low pass filter
+                if (Math.abs(radians) >= .02) {
+
+                    //Low pass filter
+                    if (Math.abs(radians) > .5) {
+                        radians /= 4;
+                    }
+
+                    int rotation_from_pivot = (int) (inner_combo_img.getRotation() + (int) Math.toDegrees(radians));
+
+                    //Full rotation
+                    if (Math.abs(rotation_from_pivot) > 360) {
+                        rotation_from_pivot = (rotation_from_pivot % 360);
+                    }
+
+                    inner_combo_img.setRotation(rotation_from_pivot);
+
+                    if (rotation_from_pivot >= lower_limit && rotation_from_pivot <= upper_limit) {
+                        correct_count++;
+                        Log.d(log_tag, "Combo correct!");
+                    }
+
+                    //Combination is correct
+                    if (correct_count >= 3) {
+                        correct_count = 0;
+                        Log.d(log_tag, "Stop.");
+                        not_done = false;
+                    }
+
+                    //---Debug---//
+                    //Log.d(log_tag, "Correct count: " + Integer.toString(correct_count));
+                    Log.d(log_tag, "Current combo: " + Integer.toString(current_combo));
+                    Log.d(log_tag, "Rotation from pivot: " + Integer.toString((int) rotation_from_pivot));
+
+                }
+            }
+            timestamp = event.timestamp;
         }
-        timestamp = event.timestamp;
     }
 
     @Override
@@ -169,7 +228,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         @Override
         public void onClick(View v) {
             generateRandomCombination();
-            toggleBtnState(generate_combo_button);
         }
     }
 }
