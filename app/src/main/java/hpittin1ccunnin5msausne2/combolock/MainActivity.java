@@ -20,17 +20,17 @@ import java.util.Random;
 
 /**
  * TODO
- * make filters better
- * implement time at correct combo
  * readme - include no plagiarism statement
  * - document how to use app
- * unlock sounds?
+ * - note that user must hold phone un-tilted when resetting
+ * change filters / rotation speed
  * new page
  * fix layouts
  */
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
+
     private TextView combo_1, combo_2, combo_3;
     private Button generate_combo_button;
     private ImageView inner_combo_img, arrow;
@@ -38,13 +38,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager mSensorManager;
     private Sensor accelerometer, gyroscope;
 
-    private final String log_tag = "development";
-    private int[] current_combination;
-    private int correct_count = 0;
     private float timestamp = 0;
-    private int deg_leeway = 2;
+    private int correct_count = 0;
     private boolean not_done = true;
-    private int on_correct_combo = 0;
+    private int[] current_combination;
+    private float time_spend_at_correct_num = 0;
+    private final String log_tag = "development";
 
     //Each tick on the lock is separated by 9 degrees
     int deg_per_tick = 9;
@@ -95,13 +94,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
-        //Warning shows up on phones with gyroscopes - commented out
+        //Warning shows up on phones with gyroscopes
         if (mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
             List<Sensor> gyroscopeSensors = mSensorManager.getSensorList(Sensor.TYPE_GYROSCOPE);
             gyroscope = gyroscopeSensors.get(0);
             mSensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
         } else {
-            //Toast.makeText(getApplicationContext(), "Phone has no gyroscope", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Phone has no gyroscope", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -120,7 +119,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         do {
             temp_combo_one = num_generator.nextInt(40);
         } while (temp_combo_one >= -5 && temp_combo_one <= 5);
-        current_combination[0] = temp_combo_one;
 
         //Combo numbers should not repeat
         //Consecutive combo numbers should be separated by ~5 ticks in either direction
@@ -129,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             temp_combo_two = num_generator.nextInt(40);
         }
         while (temp_combo_two == temp_combo_one || (temp_combo_two >= temp_combo_one - 5 && temp_combo_two <= temp_combo_one + 5));
-        current_combination[1] = temp_combo_two;
 
         //Combo numbers should not repeat
         //Consecutive combo numbers should be separated by ~5 ticks in either direction
@@ -138,12 +135,44 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             temp_combo_three = num_generator.nextInt(40);
         }
         while (temp_combo_three == temp_combo_one || temp_combo_three == temp_combo_two || (temp_combo_three >= temp_combo_two - 5 && temp_combo_three <= temp_combo_two + 5));
+
+        current_combination[0] = temp_combo_one;
+        current_combination[1] = temp_combo_two;
         current_combination[2] = temp_combo_three;
 
+        //---Debug--//
+        //current_combination[0] = 12;
+        //current_combination[1] = 26;
+        //current_combination[2] = 33;
+
+        //current_combination[0] = 12;
+        //current_combination[1] = 33;
+        //current_combination[2] = 26;
+
+        //current_combination[0] = 26;
+        //current_combination[1] = 12;
+        //current_combination[2] = 33;
+
+        //current_combination[0] = 26;
+        //current_combination[1] = 33;
+        //current_combination[2] = 12;
+
+        //current_combination[0] = 33;
+        //current_combination[1] = 12;
+        //current_combination[2] = 26;
+
+        //current_combination[0] = 33;
+        //current_combination[1] = 26;
+        //current_combination[2] = 12;
+
         //Display combination
-        combo_1.setText(Integer.toString(current_combination[0]));
-        combo_2.setText(Integer.toString(current_combination[1]));
-        combo_3.setText(Integer.toString(current_combination[2]));
+        String combo_one = Integer.toString(current_combination[0]);
+        String combo_two = Integer.toString(current_combination[1]);
+        String combo_three = Integer.toString(current_combination[2]);
+
+        combo_1.setText(combo_one);
+        combo_2.setText(combo_two);
+        combo_3.setText(combo_three);
     }
 
     @Override
@@ -151,19 +180,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         if (not_done) {
 
+            int deg_leeway = 2;
             float x_axis_reading = event.values[0];
-            int current_combo;
+            int current_combo = 0;
 
-            //Configure first and third combination number
-            if (correct_count != 1) {
+            //Configure first combination number
+            if (correct_count == 0) {
                 current_combo = -(current_combination[correct_count] * deg_per_tick);
-            } else {
-                //Configuring middle combination number
+            //Configure second combination number
+            } else if (correct_count == 1) {
                 if (current_combination[correct_count] != 0) {
                     if (current_combination[0] > current_combination[1]) {
                         current_combo = -(current_combination[1] * deg_per_tick);
                     } else {
                         current_combo = 360 - (current_combination[correct_count] * deg_per_tick);
+                    }
+                } else {
+                    current_combo = current_combination[correct_count];
+                }
+            //Configure third combination number
+            } else if (correct_count == 2) {
+                if (current_combination[correct_count] != 0) {
+                    if (current_combination[2] > current_combination[1] && current_combination[0] < current_combination[1]) {
+                        current_combo = 360 - (current_combination[2] * deg_per_tick);
+                    } else {
+                        current_combo = -(current_combination[2] * deg_per_tick);
                     }
                 } else {
                     current_combo = current_combination[correct_count];
@@ -178,11 +219,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 final float time_interval = (event.timestamp - timestamp) * NS2S;
                 float radians = x_axis_reading * time_interval;
 
-                //Low pass filter
-                if (Math.abs(radians) >= .02) {
+                //Low pass filter - stops shaking
+                if (Math.abs(radians) >= .03) {
 
-                    //Low pass filter
-                    if (Math.abs(radians) > .5) {
+                    //Low pass filter - stops image from rotating too fast
+                    if (Math.abs(radians) > 0.5) {
                         radians /= 4;
                     }
 
@@ -195,10 +236,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                     inner_combo_img.setRotation(rotation_from_pivot);
 
-                    //change lower limit
+                    //---Debug---//
+                    //Log.d(log_tag, "Correct count: " + Integer.toString(correct_count));
+                    Log.d(log_tag, "Current combo: " + Integer.toString(current_combo));
+                    Log.d(log_tag, "Rotation from pivot: " + Integer.toString(rotation_from_pivot));
+
+                }
+                //Not moving - check if user is on correct combination number
+                else {
+                    int rotation_from_pivot = (int) (inner_combo_img.getRotation());
                     if (rotation_from_pivot >= lower_limit && rotation_from_pivot <= upper_limit) {
-                        if (on_correct_combo >= 3) {
-                            on_correct_combo = 0;
+                        if (time_spend_at_correct_num >= 0.75) {
+                            time_spend_at_correct_num = 0;
                             switch (correct_count) {
                                 case 0:
                                     combo_1.setTextColor(Color.GREEN);
@@ -213,25 +262,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             correct_count++;
                             Log.d(log_tag, "Combo correct!");
                         }
-                        //filter
-                        on_correct_combo++;
+                        time_spend_at_correct_num += time_interval;
+                        //---Debug---//
+                        //Log.d(log_tag, "time: " + (int) time_spend_at_correct_num);
                     }
-
-                    //Combination is correct
-                    if (correct_count >= 3) {
-                        correct_count = 0;
-                        on_correct_combo = 0;
-                        Log.d(log_tag, "Stop.");
-                        Toast.makeText(getApplicationContext(), "You have successfully unlocked the lock", Toast.LENGTH_LONG).show();
-                        not_done = false;
-                    }
-
-                    //---Debug---//
-                    //Log.d(log_tag, "Correct count: " + Integer.toString(correct_count));
-                    Log.d(log_tag, "Current combo: " + Integer.toString(current_combo));
-                    Log.d(log_tag, "Rotation from pivot: " + Integer.toString((int) rotation_from_pivot));
-
                 }
+
+                //Combination is correct
+                if (correct_count >= 3) {
+                    correct_count = 0;
+                    time_spend_at_correct_num = 0;
+                    Log.d(log_tag, "Stop.");
+                    Toast.makeText(getApplicationContext(), "You have successfully unlocked the lock", Toast.LENGTH_LONG).show();
+                    not_done = false;
+                }
+
             }
             timestamp = event.timestamp;
         }
@@ -258,12 +303,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             combo_2.setTextColor(Color.BLACK);
             combo_3.setTextColor(Color.BLACK);
 
-            on_correct_combo = 0;
+            time_spend_at_correct_num = 0;
             correct_count = 0;
             not_done = true;
 
             //Set inner lock image to original offset
             inner_combo_img.setRotation(4);
+
+            //---Debug---//
+            //Log.d(log_tag, "Reset.");
 
         }
     }
