@@ -23,9 +23,9 @@ import java.util.Random;
  * readme - include no plagiarism statement
  * - document how to use app
  * - note that user must hold phone un-tilted when resetting
- * change filters / rotation speed
+ * - note that we dont support multiple screens
+ * - compiles on android studio 2.1
  * new page
- * fix layouts
  */
 
 
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         if (not_done) {
 
-            int deg_leeway = 2;
+            int deg_leeway = 10;
             float x_axis_reading = event.values[0];
             int current_combo = 0;
 
@@ -208,14 +208,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 float radians = x_axis_reading * time_interval;
 
                 //Low pass filter - stops shaking
-                if (Math.abs(radians) >= .03) {
-
-                    //Low pass filter - stops image from rotating too fast
-                    if (Math.abs(radians) > 0.5) {
-                        radians /= 4;
-                    }
+                if (Math.abs(radians) >= .04) {
 
                     int rotation_from_pivot = (int) (inner_combo_img.getRotation() + (int) Math.toDegrees(radians));
+
+                    //Speed zones. If you are close to combination number, slow down spinning speed
+                    if (rotation_from_pivot >= lower_limit - (deg_leeway*5) && rotation_from_pivot <= upper_limit + (deg_leeway*5)) {
+                        rotation_from_pivot = (int) (inner_combo_img.getRotation() + (int) Math.toDegrees(radians / 2));
+                        if (rotation_from_pivot >= lower_limit - (deg_leeway * 2) && rotation_from_pivot <= upper_limit + (deg_leeway * 2)) {
+                            rotation_from_pivot = (int) (inner_combo_img.getRotation() + (int) Math.toDegrees(radians / 4));
+                        }
+                    }
 
                     //Full rotation
                     if (Math.abs(rotation_from_pivot) > 360) {
