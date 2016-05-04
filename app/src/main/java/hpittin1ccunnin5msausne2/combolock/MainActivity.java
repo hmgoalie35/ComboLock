@@ -71,6 +71,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //Correct image distortion
         inner_combo_img.setRotation(4);
 
+        //Reset arrow to fix bug
+        arrow.setRotation(0);
+        arrow.setScaleX(1);
+        arrow.setRotation(-45);
+
         current_combination = new int[3];
 
         generateRandomCombination();
@@ -140,31 +145,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         current_combination[1] = temp_combo_two;
         current_combination[2] = temp_combo_three;
 
-        //---Debug--//
-        //current_combination[0] = 12;
-        //current_combination[1] = 26;
-        //current_combination[2] = 33;
-
-        //current_combination[0] = 12;
-        //current_combination[1] = 33;
-        //current_combination[2] = 26;
-
-        //current_combination[0] = 26;
-        //current_combination[1] = 12;
-        //current_combination[2] = 33;
-
-        //current_combination[0] = 26;
-        //current_combination[1] = 33;
-        //current_combination[2] = 12;
-
-        //current_combination[0] = 33;
-        //current_combination[1] = 12;
-        //current_combination[2] = 26;
-
-        //current_combination[0] = 33;
-        //current_combination[1] = 26;
-        //current_combination[2] = 12;
-
         //Display combination
         String combo_one = Integer.toString(current_combination[0]);
         String combo_two = Integer.toString(current_combination[1]);
@@ -188,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             if (correct_count == 0) {
                 current_combo = -(current_combination[correct_count] * deg_per_tick);
             //Configure second combination number
+            //Switch arrow direction
             } else if (correct_count == 1) {
                 if (current_combination[correct_count] != 0) {
                     if (current_combination[0] > current_combination[1]) {
@@ -198,7 +179,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 } else {
                     current_combo = current_combination[correct_count];
                 }
+                arrow.setRotation(0);
+                arrow.setScaleX(-1);
+                arrow.setRotation(50);
             //Configure third combination number
+            //Switch arrow direction
             } else if (correct_count == 2) {
                 if (current_combination[correct_count] != 0) {
                     if (current_combination[2] > current_combination[1] && current_combination[0] < current_combination[1]) {
@@ -209,6 +194,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 } else {
                     current_combo = current_combination[correct_count];
                 }
+                arrow.setRotation(0);
+                arrow.setScaleX(1);
+                arrow.setRotation(-45);
             }
 
             int lower_limit = current_combo - deg_leeway;
@@ -309,6 +297,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             //Set inner lock image to original offset
             inner_combo_img.setRotation(4);
+
+            //Reset arrow
+            arrow.setRotation(0);
+            arrow.setScaleX(1);
+            arrow.setRotation(-45);
 
             //---Debug---//
             //Log.d(log_tag, "Reset.");
