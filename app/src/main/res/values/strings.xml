@@ -5,4 +5,5 @@
     <string name="combination_lock">Combination Lock</string>
     <string name="default_combo">0</string>
     <string name="combo_lock_spinner_text">combolock_spinner</string>
+    <string name="go_back">Go Back</string>
 </resources>

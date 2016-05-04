@@ -1,6 +1,7 @@
 package hpittin1ccunnin5msausne2.combolock;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -266,6 +267,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     Log.d(log_tag, "Stop.");
                     Toast.makeText(getApplicationContext(), "You have successfully unlocked the lock", Toast.LENGTH_LONG).show();
                     not_done = false;
+                    Intent intent = new Intent(this, ComboUnlockedActivity.class);
+                    startActivity(intent);
                 }
 
             }
