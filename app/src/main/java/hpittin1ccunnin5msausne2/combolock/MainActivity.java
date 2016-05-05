@@ -27,7 +27,6 @@ import java.util.Random;
  * - note that we dont support multiple screens
  * - compiles on android studio 2.1
  * Generate new combo after hitting back button messes up reset
- * Clean up code
  */
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -73,9 +72,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         inner_combo_img.setRotation(4);
 
         //Reset arrow to fix bug
-        arrow.setRotation(0);
-        arrow.setScaleX(1);
-        arrow.setRotation(-45);
+        resetArrow();
 
         current_combination = new int[3];
 
@@ -164,54 +161,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float x_axis_reading = event.values[0];
             int current_combo = 0;
 
-            //Configure first combination number
-            //Gyroscope gives negative readings when the phone is rotated CW
-            //Make current combo negative to force user to spin CW
-            if (correct_count == 0) {
-                current_combo = -(current_combination[correct_count] * deg_per_tick);
-
-            //Configure second combination number
-            //Gyroscope gives positive readings when the phone is rotated CCW
-            //Make current combo positive to force user to spin CCW
-            } else if (correct_count == 1) {
-                if (current_combination[correct_count] != 0) {
-                    //If first combo num is larger than second, make the second number negative so
-                    //the user has to spin the phone a smaller distance
-                    if (current_combination[0] > current_combination[1]) {
-                        current_combo = -(current_combination[1] * deg_per_tick);
-                    } else {
-                        //Make second combo positive to force user to spin CCW
-                        current_combo = 360 - (current_combination[correct_count] * deg_per_tick);
-                    }
-                } else {
-                    current_combo = current_combination[correct_count];
-                }
-
-                //Switch arrow direction
-                arrow.setRotation(0);
-                arrow.setScaleX(-1);
-                arrow.setRotation(50);
-
-            //Configure third combination number
-            } else if (correct_count == 2) {
-                if (current_combination[correct_count] != 0) {
-                    //If the combo numbers are in sorted order, make the third number positive so the
-                    //user has to spin the phone a smaller distance from the second number
-                    if (current_combination[2] > current_combination[1] && current_combination[0] < current_combination[1]) {
-                        current_combo = 360 - (current_combination[2] * deg_per_tick);
-                    } else {
-                        //Make third combo negative to force user to spin CW
-                        current_combo = -(current_combination[2] * deg_per_tick);
-                    }
-                } else {
-                    current_combo = -current_combination[correct_count];
-                }
-
-                //Switch arrow direction
-                arrow.setRotation(0);
-                arrow.setScaleX(1);
-                arrow.setRotation(-45);
-            }
+            //Get the degrees the user must spin the phone
+            current_combo = getCurrentCombo();
 
             int lower_limit = current_combo - deg_leeway;
             int upper_limit = current_combo + deg_leeway;
@@ -252,10 +203,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     //Log.d(log_tag, "Rotation from pivot: " + Integer.toString(rotation_from_pivot));
 
                 }
+
                 //Not moving - check if user is on correct combination number
                 else {
                     int rotation_from_pivot = (int) (inner_combo_img.getRotation());
                     if (rotation_from_pivot >= lower_limit && rotation_from_pivot <= upper_limit) {
+
                         //True if user has been on the correct number for 0.75 seconds
                         if (time_spend_at_correct_num >= 0.75) {
                             time_spend_at_correct_num = 0;
@@ -273,6 +226,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             correct_count++;
                             //Log.d(log_tag, "Combo correct!");
                         }
+
                         time_spend_at_correct_num += time_interval;
                         //---Debug---//
                         //Log.d(log_tag, "time: " + (int) time_spend_at_correct_num);
@@ -283,11 +237,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if (correct_count >= 3) {
                     correct_count = 0;
                     time_spend_at_correct_num = 0;
-                    //Log.d(log_tag, "Stop.");
                     Toast.makeText(getApplicationContext(), "You have successfully unlocked the lock", Toast.LENGTH_LONG).show();
                     not_done = false;
                     Intent intent = new Intent(this, ComboUnlockedActivity.class);
                     startActivity(intent);
+                    //Log.d(log_tag, "Stop.");
                 }
 
             }
@@ -302,73 +256,81 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
     /**
+     * Returns the necessary number of degrees that the user must spin the phone to land on a
+     * combination number.
      *
+     * @return  Number of degrees that user must rotate the phone.
      */
-//    private int getCurrentCombo() {
-//
-//        int current_combo = 0;
-//
-//        //Configure first combination number
-//        //Gyroscope gives negative readings when the phone is rotated CW
-//        //Make current combo negative to force user to spin CW
-//        if (correct_count == 0) {
-//            current_combo = -(current_combination[correct_count] * deg_per_tick);
-//
-//            //Configure second combination number
-//            //Gyroscope gives positive readings when the phone is rotated CCW
-//            //Make current combo positive to force user to spin CCW
-//        } else if (correct_count == 1) {
-//            if (current_combination[correct_count] != 0) {
-//                //If first combo num is larger than second, make the second number negative so
-//                //the user has to spin the phone a smaller distance
-//                if (current_combination[0] > current_combination[1]) {
-//                    current_combo = -(current_combination[1] * deg_per_tick);
-//                } else {
-//                    //Make second combo positive to force user to spin CCW
-//                    current_combo = 360 - (current_combination[correct_count] * deg_per_tick);
-//                }
-//            } else {
-//                current_combo = current_combination[correct_count];
-//            }
-//
-//            //Switch arrow direction
-//            arrow.setRotation(0);
-//            arrow.setScaleX(-1);
-//            arrow.setRotation(50);
-//
-//            //Configure third combination number
-//        } else if (correct_count == 2) {
-//            if (current_combination[correct_count] != 0) {
-//                //If the combo numbers are in sorted order, make the third number positive so the
-//                //user has to spin the phone a smaller distance from the second number
-//                if (current_combination[2] > current_combination[1] && current_combination[0] < current_combination[1]) {
-//                    current_combo = 360 - (current_combination[2] * deg_per_tick);
-//                } else {
-//                    //Make third combo negative to force user to spin CW
-//                    current_combo = -(current_combination[2] * deg_per_tick);
-//                }
-//            } else {
-//                current_combo = -current_combination[correct_count];
-//            }
-//
-//            //Switch arrow direction
-//            arrow.setRotation(0);
-//            arrow.setScaleX(1);
-//            arrow.setRotation(-45);
-//        }
-//        return current_combo;
-//    }
+    private int getCurrentCombo() {
 
-    private void resetArrow() {
-//        arrow.setRotation(0);
-//        arrow.setScaleX(1);
-//        arrow.setRotation(-45);
+        int current_combo = 0;
+
+        //Configure first combination number
+        //Gyroscope gives negative readings when the phone is rotated CW
+        //Make current combo negative to force user to spin CW
+        if (correct_count == 0) {
+            current_combo = -(current_combination[correct_count] * deg_per_tick);
+        }
+
+        //Configure second combination number
+        //Gyroscope gives positive readings when the phone is rotated CCW
+        //Make current combo positive to force user to spin CCW
+        else if (correct_count == 1) {
+            if (current_combination[correct_count] != 0) {
+                //If first combo num is larger than second, make the second number negative so
+                //the user has to spin the phone a smaller distance
+                if (current_combination[0] > current_combination[1]) {
+                    current_combo = -(current_combination[1] * deg_per_tick);
+                } else {
+                    //Make second combo positive to force user to spin CCW
+                    current_combo = 360 - (current_combination[correct_count] * deg_per_tick);
+                }
+            } else {
+                current_combo = current_combination[correct_count];
+            }
+
+            //Switch arrow direction
+            flipArrow();
+        }
+
+        //Configure third combination number
+        else if (correct_count == 2) {
+            if (current_combination[correct_count] != 0) {
+                //If the combo numbers are in sorted order, make the third number positive so the
+                //user has to spin the phone a smaller distance from the second number
+                if (current_combination[2] > current_combination[1] && current_combination[0] < current_combination[1]) {
+                    current_combo = 360 - (current_combination[2] * deg_per_tick);
+                } else {
+                    //Make third combo negative to force user to spin CW
+                    current_combo = -(current_combination[2] * deg_per_tick);
+                }
+            } else {
+                current_combo = -current_combination[correct_count];
+            }
+
+            //Switch arrow direction
+            resetArrow();
+        }
+
+        return current_combo;
     }
 
+    /**
+     * Set arrow to initial orientation. Arrow will be pointing to the right.
+     */
+    private void resetArrow() {
+        arrow.setRotation(0);
+        arrow.setScaleX(1);
+        arrow.setRotation(-45);
+    }
+
+    /**
+     * Flip the arrow from the original orientation. Arrow will be pointing to the left.
+     */
     private void flipArrow() {
-//            arrow.setRotation(0);
-//            arrow.setScaleX(-1);
-//            arrow.setRotation(50);
+        arrow.setRotation(0);
+        arrow.setScaleX(-1);
+        arrow.setRotation(50);
     }
 
     /**
