@@ -2,19 +2,21 @@
 An android app that models a combination lock. The user must rotate their phone in order to match the combination and unlock the lock. Upon unlocking the lock, a secret message will be shown
 
 This was a group project for CS480S (Smart Devices and Sensing)
+
 Binghamton University
+
 Professor Wang
 
 
-![start screen](demo_images/1.png)
+![img_1](demo_images/1.png)
 
-![start screen](demo_images/2.png)
+![img_2](demo_images/2.png)
 
-![start screen](demo_images/3.png)
+![img_3](demo_images/3.png)
 
-![start screen](demo_images/4.png)
+![img_4](demo_images/4.png)
 
-![start screen](demo_images/5.png)
+![img_5](demo_images/5.png)
 
 # About
 * This app utilizes a device's gyroscope to determine the current degrees the device has turned and rotate a combination lock accordingly
@@ -39,6 +41,7 @@ Professor Wang
 * From here you can view the secret message and go back to the main app screen and generate a new random combination
 * It is best if the user holds the phone un-tilted when resetting
 * You must be steadily on the correct number in order for the app to accept it as being correct
+
 *NOTE: If you overshoot the number you can't go backwards to get the number, you must do a full circle*
 
 
@@ -65,4 +68,5 @@ This app shows proof of concept and lays the groundwork for the items listed bel
 * Generate new combo after hitting back button messes up reset (it doesn't go to 0)
 
 **Required Binghamton Plagiarism Statement:**
-*"We have done this assignment completely on my own. We have not copied it, nor have We given my solution to anyone else. Weunderstand that if we are involved in plagiarism or cheating we will have to sign an official form that we have cheated and that this form will be stored in my official university record. We also understand that we will receive a grade of 0 for the involved assignment for our first offense and that we will receive a grade of “F” for the course for any additional offense."*
+
+*"We have done this assignment completely on our own. We have not copied it, nor have We given our solution to anyone else. We understand that if we are involved in plagiarism or cheating we will have to sign an official form that we have cheated and that this form will be stored in my official university record. We also understand that we will receive a grade of 0 for the involved assignment for our first offense and that we will receive a grade of “F” for the course for any additional offense."*
