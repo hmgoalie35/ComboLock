@@ -7,12 +7,14 @@ Professor Wang
 
 
 ![start screen](demo_images/1.png)
+
 ![start screen](demo_images/2.png)
+
 ![start screen](demo_images/3.png)
+
 ![start screen](demo_images/4.png)
+
 ![start screen](demo_images/5.png)
-
-
 
 # About
 * This app utilizes a device's gyroscope to determine the current degrees the device has turned and rotate a combination lock accordingly
@@ -51,6 +53,7 @@ This app shows proof of concept and lays the groundwork for the items listed bel
 * Conor Cunningham
 * Matthew Sausner
 * Harris Pittinsky
+* Cody Dynarski (photoshopping the image)
 
 
 # Misc
