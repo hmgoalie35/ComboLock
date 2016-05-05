@@ -42,9 +42,6 @@ Professor Wang
 * It is best if the user holds the phone un-tilted when resetting
 * You must be steadily on the correct number in order for the app to accept it as being correct
 
-*NOTE: If you overshoot the number you can't go backwards to get the number, you must do a full circle*
-
-
 # Future Work
 This app shows proof of concept and lays the groundwork for the items listed below
 
