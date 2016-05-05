@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     }
                 }
 
-                //Combination is correct
+                //Combination is correct. Go to hidden screen
                 if (correct_count >= 3) {
                     correct_count = 0;
                     time_spend_at_correct_num = 0;
