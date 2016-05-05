@@ -9,7 +9,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -18,16 +17,6 @@ import android.widget.Toast;
 
 import java.util.List;
 import java.util.Random;
-
-/**
- * TODO
- * readme - include no plagiarism statement
- * - document how to use app
- * - note that user must hold phone un-tilted when resetting
- * - note that we dont support multiple screens
- * - compiles on android studio 2.1
- * Generate new combo after hitting back button messes up reset
- */
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
