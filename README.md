@@ -24,7 +24,7 @@ Professor Wang
 
 # Installing
 1. Get the apk from this repository (under release/)
-2. Depending on your device, you  might need to allow unlisted apps to be installed
+2. Depending on your device, you  might need to allow installing from unknown sources
 3. Download the apk to your device and click to open it
 4. You should be prompted to install it
 
